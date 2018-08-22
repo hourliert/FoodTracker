@@ -29,11 +29,19 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         // Handle the text field’s user input through delegate callbacks.
         nameTextField.delegate = self
         
+        // Set up views if editing an existing Meal.
+        if let meal = meal {
+            navigationItem.title = meal.name
+            nameTextField.text = meal.name
+            photoImageView.image = meal.photo
+            ratingControl.rating = meal.rating
+        }
+        
         // Enable the Save button only if the text field has a valid Meal name.
         updateSaveButtonState()
     }
 
-    //MARK: UITextFieldDelegate
+    //MARK:- UITextFieldDelegate
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Hide the keyboard.
@@ -51,7 +59,7 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         navigationItem.title = textField.text
     }
     
-    //MARK: UIImagePickerControllerDelegate
+    //MARK:- UIImagePickerControllerDelegate
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         // Dismiss the picker if the user canceled.
@@ -71,10 +79,18 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         dismiss(animated: true, completion: nil)
     }
     
-    //MARK: Navigation
+    //MARK:- Navigation
     
     @IBAction func cancel(_ sender: UIBarButtonItem) {
-        dismiss(animated: true, completion: nil)
+        let isPresentingInAddMealMode = presentingViewController is UINavigationController
+        
+        if isPresentingInAddMealMode {
+            dismiss(animated: true, completion: nil)
+        } else if let owningNavigationController = navigationController {
+            owningNavigationController.popViewController(animated: true)
+        } else {
+            fatalError("The MealViewController is not inside a navigation controller.")
+        }
     }
     
     // This method lets you configure a view controller before it's presented.
@@ -95,7 +111,7 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         meal = Meal(name: name, photo: photo, rating: rating)
     }
     
-    //MARK: Actions
+    //MARK:- Actions
     
     @IBAction func selectImageFromPhotoLibrary(_ sender: UITapGestureRecognizer) {
         // Hide the keyboard.
@@ -111,7 +127,7 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         present(imagePickerController, animated: true, completion: nil)
     }
     
-    //MARK: Private Methods
+    //MARK:- Private Methods
     
     private func updateSaveButtonState() {
         // Disable the Save button if the text field is empty.
